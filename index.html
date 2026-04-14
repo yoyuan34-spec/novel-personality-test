@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>书虫人格测试 | 你是哪种type的小说人？</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--black:#111;--grey:#888;--border:#e0e0e0;--bg:#fff;--card:#fff;--tag-bg:#f3f3f3}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);overflow-x:hidden}
+#app{max-width:420px;margin:0 auto;padding:20px 16px;min-height:100vh;position:relative}
+
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.particle{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0}
+@keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:.15}90%{opacity:.15}100%{transform:translateY(-10vh) scale(1);opacity:0}}
+
+.landing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:90vh;text-align:center;animation:fadeIn .8s ease}
+.landing-icon{font-size:48px;margin-bottom:24px;animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.landing h1{font-size:28px;font-weight:900;color:var(--black);margin-bottom:12px;line-height:1.4;letter-spacing:-0.5px}
+.landing .subtitle{font-size:14px;color:var(--grey);margin-bottom:6px;line-height:1.6;letter-spacing:1px}
+.landing .desc{font-size:13px;color:#aaa;margin-bottom:32px;line-height:1.8}
+.start-btn{background:var(--black);border:none;color:#fff;font-size:16px;font-weight:700;padding:16px 52px;border-radius:50px;cursor:pointer;transition:all .3s;letter-spacing:2px}
+.start-btn:hover{background:#333;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.15)}
+.start-btn:active{transform:translateY(0)}
+.tag-cloud{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:36px}
+.tag-cloud span{background:var(--tag-bg);padding:6px 14px;border-radius:20px;font-size:12px;color:var(--grey);border:1px solid var(--border)}
+
+.progress-wrap{position:sticky;top:0;z-index:10;padding:12px 0;background:linear-gradient(180deg,rgba(255,255,255,0.97),transparent)}
+.progress-bar{height:2px;background:#eee;border-radius:1px;overflow:hidden}
+.progress-fill{height:100%;background:var(--black);border-radius:1px;transition:width .4s ease}
+.progress-text{font-size:11px;color:#bbb;margin-top:6px;text-align:right;letter-spacing:1px}
+
+.question-page{animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-16px)}}
+.question-num{font-size:12px;color:#bbb;font-weight:700;margin-bottom:12px;letter-spacing:2px}
+.question-text{font-size:20px;font-weight:800;line-height:1.6;margin-bottom:8px;color:var(--black)}
+.question-hint{font-size:12px;color:#bbb;margin-bottom:20px}
+
+/* Single-select */
+.options{display:flex;flex-direction:column;gap:12px}
+.option-btn{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;font-size:14px;color:var(--black);text-align:left;cursor:pointer;transition:all .25s;line-height:1.6}
+.option-btn:hover{border-color:#999;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+.option-btn:active{transform:scale(0.98);background:var(--tag-bg)}
+.option-label{position:relative;z-index:1}
+.option-icon{margin-right:8px;font-weight:800;color:#bbb}
+
+/* Multi-select pills */
+.multi-options{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}
+.tag-option{padding:10px 20px;border:1.5px solid var(--border);border-radius:28px;background:var(--card);color:var(--black);font-size:14px;cursor:pointer;transition:all .2s;user-select:none;font-weight:500}
+.tag-option:hover{border-color:#999}
+.tag-option.selected{background:var(--black);color:#fff;border-color:var(--black)}
+.next-btn{width:100%;padding:15px;border-radius:14px;border:none;background:var(--black);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:1px}
+.next-btn:disabled{background:#ddd;color:#aaa;cursor:not-allowed}
+.next-btn:not(:disabled):hover{background:#333;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+
+.loading-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;animation:fadeIn .5s ease}
+.loading-spinner{width:48px;height:48px;border:2px solid #eee;border-top-color:var(--black);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:15px;color:var(--grey);animation:blink 1.5s ease-in-out infinite;font-weight:600}
+@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+.loading-tips{font-size:12px;color:#bbb;margin-top:10px}
+
+.result-page{animation:fadeIn .8s ease;padding-bottom:40px}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:20px;box-shadow:0 2px 16px rgba(0,0,0,0.04)}
+.result-header{padding:36px 24px 28px;text-align:center;background:var(--black);color:#fff}
+.result-code{font-size:13px;letter-spacing:5px;color:rgba(255,255,255,0.5);margin-bottom:8px;font-weight:600}
+.result-name{font-size:30px;font-weight:900;margin-bottom:12px;line-height:1.3;color:#fff}
+.result-tagline{font-size:13px;color:rgba(255,255,255,0.6);font-style:italic;line-height:1.6;padding:0 8px}
+.result-body{padding:24px}
+.result-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;justify-content:center}
+.result-tag{background:var(--tag-bg);border:1px solid var(--border);color:#555;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.result-desc{font-size:14px;line-height:2;color:#444;margin-bottom:20px}
+.result-fav{font-size:13px;color:var(--grey);margin-bottom:24px;padding:14px 16px;background:var(--tag-bg);border-radius:12px;line-height:1.8}
+.result-fav strong{color:var(--black);font-weight:700}
+.dimension-bars{margin-bottom:24px}
+.dim-item{margin-bottom:16px}
+.dim-labels{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;letter-spacing:0.5px}
+.dim-left{font-weight:700;color:var(--black)}
+.dim-right{font-weight:700;color:var(--grey)}
+.dim-bar{height:6px;background:#eee;border-radius:3px;overflow:hidden}
+.dim-fill{height:100%;border-radius:3px;background:var(--black);transition:width 1s ease}
+.result-section{margin-bottom:20px}
+.result-section h3{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--black);display:flex;align-items:center;gap:6px;letter-spacing:0.5px}
+.result-section h3::before{content:'';width:3px;height:13px;background:var(--black);border-radius:2px}
+.rec-tags{display:flex;flex-wrap:wrap;gap:8px}
+.rec-tag{background:var(--tag-bg);border:1px solid var(--border);color:#666;padding:5px 12px;border-radius:14px;font-size:12px}
+.match-row{display:flex;gap:12px}
+.match-card{flex:1;background:var(--tag-bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border)}
+.match-card .label{font-size:11px;color:#aaa;margin-bottom:6px}
+.match-card .name{font-size:14px;font-weight:800}
+.match-card.best .name{color:var(--black)}
+.match-card.rival .name{color:var(--grey)}
+.watermark{text-align:center;padding:16px;font-size:10px;color:#ccc;border-top:1px solid var(--border);margin-top:12px;letter-spacing:2px}
+.action-btns{display:flex;gap:12px;margin-bottom:24px}
+.action-btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s}
+.btn-primary{background:var(--black);color:#fff}
+.btn-secondary{background:var(--card);color:var(--black);border:1.5px solid var(--border)}
+.btn-primary:hover{background:#333;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+.btn-secondary:hover{background:var(--tag-bg)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;padding:12px 24px;border-radius:12px;font-size:13px;z-index:200;animation:toastIn .3s ease;font-weight:600}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@media(max-width:360px){
+  .landing h1{font-size:24px}
+  .question-text{font-size:18px}
+  .result-name{font-size:26px}
+}
+</style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+<div id="app"></div>
+<script>
+/* ── orientation context system ── */
+let orient = 'bg';
+function tx(v){ return typeof v==='string' ? v : (v[orient]||v.bg); }
+
+const questions = [
+  // ═══ dim0: G vs B (仅此1题，直接定性向) ═══
+  {dim:0, multi:true, text:'你平时最常看哪些类型？', options:[
+    {text:'言情BG',score:1},
+    {text:'耽美BL',score:-1},
+    {text:'百合GL',score:-1},
+    {text:'GB',score:-1},
+    {text:'杂食 / 都吃',score:0}
+  ]},
+
+  // ═══ dim1: P vs D — 以下场景全部跟随性向 ═══
+  {dim:1, text:{
+    bg:'书荒了！朋友安利了三本言情，你先点开哪本？',
+    bl:'书荒了！朋友安利了三本耽美，你先点开哪本？',
+    gl:'书荒了！朋友安利了三本百合，你先点开哪本？'
+  }, options:[
+    {text:{bg:'「霸总×小助理，日常甜到蛀牙，零虐」',bl:'「校园双向暗恋，全程发糖，甜到齁」',gl:'「闺蜜变恋人，青梅竹马，甜度超标」'},score:1},
+    {text:{bg:'「追妻火葬场，总裁在雨中跪了三十章」',bl:'「替身文，白月光回来后攻跪了一整本」',gl:'「她暗恋了她十年，最后目送她出嫁」'},score:-1},
+    {text:{bg:'「先虐后甜，误会解开后双倍补偿」',bl:'「先虐后甜，两个人在绝望里互相救赎」',gl:'「从误解到和解，她们终于读懂彼此」'},score:0}
+  ]},
+  {dim:1, text:'看到文案写「本文高虐慎入」，你？', options:[
+    {text:'告辞！我只看纯甜，不接受任何刀',score:1},
+    {text:'太好了！正合我意，冲冲冲！',score:-1},
+    {text:'先翻评论确认结局再决定',score:0}
+  ]},
+  {dim:1, text:{
+    bg:'你穿进一本小说，发现自己是注定被男主辜负的白月光——',
+    bl:'你穿进一本小说，发现自己是注定被他辜负的白月光——',
+    gl:'你穿进一本小说，发现自己是注定被她辜负的白月光——'
+  }, options:[
+    {text:'改命！想尽办法让自己和喜欢的人甜甜蜜蜜HE',score:1},
+    {text:'认了，轰轰烈烈爱一场，虐就虐吧，痛过才深刻',score:-1},
+    {text:'直接放弃感情线，搞事业搞钱去',score:0}
+  ]},
+  {dim:1, text:{
+    bg:'深夜追文，她终于等到他说「我喜欢你」，下一章标题却写着「离别」——',
+    bl:'深夜追文，他终于等到他说「我喜欢你」，下一章标题却写着「离别」——',
+    gl:'深夜追文，她终于等到她说「我喜欢你」，下一章标题却写着「离别」——'
+  }, options:[
+    {text:'关掉！明天确认不是真刀再回来',score:1},
+    {text:'虐吧！这才是好文该有的节奏',score:-1},
+    {text:'咬咬牙点开，但手指随时准备退出',score:0}
+  ]},
+  {dim:1, multi:true, text:'你最常搜的标签有哪些？', options:[
+    {text:'小甜饼',score:1},
+    {text:'种田日常',score:1},
+    {text:'无虐纯甜',score:1},
+    {text:'追妻火葬场',score:-1},
+    {text:'意难平',score:-1},
+    {text:'BE美学',score:-1},
+    {text:'强制爱',score:-1},
+    {text:'先虐后甜',score:0},
+    {text:'欢喜冤家',score:0}
+  ]},
+
+  // ═══ dim2: M vs S ═══
+  {dim:2, multi:true, text:'哪些人设让你直接上头？', options:[
+    {text:'强强联手',score:1},
+    {text:'双大佬',score:1},
+    {text:{bg:'势均力敌',bl:'互攻',gl:'互攻'},score:1},
+    {text:{bg:'弱男强女',bl:'弱攻强受',gl:'弱攻强受'},score:-1},
+    {text:'美强惨',score:-1},
+    {text:'偏执疯批',score:-1},
+    {text:'病娇',score:-1},
+    {text:'战损美人',score:-1}
+  ]},
+  {dim:2, text:{
+    bg:'你穿书了，面前站着一个高冷禁欲的男人，你的第一反应？',
+    bl:'你穿书了，面前站着一个冷面如霜的男人，你的第一反应？',
+    gl:'你穿书了，面前站着一个清冷疏离的女人，你的第一反应？'
+  }, options:[
+    {text:'燃起来了！我要变强，站到和TA并肩的位置',score:1},
+    {text:'示弱卖惨！等大佬心软了主动来罩我',score:-1},
+    {text:'先冷静分析局势，搞清楚剧情再说',score:0}
+  ]},
+  {dim:2, text:'选一个让你最上头的场景？', options:[
+    {text:{
+      bg:'他和她隔桌对峙，一个眼神暗潮汹涌，谁先心动谁就输了',
+      bl:'他和他隔桌对峙，一个眼神暗潮汹涌，谁先心动谁就输了',
+      gl:'她和她隔桌对峙，一个眼神暗潮汹涌，谁先心动谁就输了'
+    },score:1},
+    {text:{
+      bg:'所有人以为她柔弱可欺，直到她亮出底牌，他在一旁看呆了',
+      bl:'所有人以为他好欺负，直到他亮出底牌，那个人在一旁看呆了',
+      gl:'所有人以为她柔弱可欺，直到她亮出底牌，她在一旁看呆了'
+    },score:-1},
+    {text:{
+      bg:'他默默守护了她多年，她终于发现那个人一直在身边',
+      bl:'他默默守护了他多年，他终于发现那个人一直在身边',
+      gl:'她默默守护了她多年，她终于发现那个人一直在身边'
+    },score:0}
+  ]},
+  {dim:2, text:'你更想代入哪种角色？', options:[
+    {text:'「能和我并肩的人，才配站在我身边」',score:1},
+    {text:'「全世界都小看我？那就让全世界看好了」',score:-1},
+    {text:'「我只在乎真心，不在乎谁强谁弱」',score:0}
+  ]},
+
+  // ═══ dim3: O vs N ═══
+  {dim:3, text:{
+    bg:'女主的渣前任跪着求复合，你希望？',
+    bl:'主角的渣前任跪着求复合，你希望？',
+    gl:'她的渣前任跪着求复合，你希望？'
+  }, options:[
+    {text:'给个机会！浪子回头金不换',score:1},
+    {text:'踹了！头也不回去找更好的',score:-1},
+    {text:'看情况，真心悔改了可以考虑',score:0}
+  ]},
+  {dim:3, text:'主角被最信任的人背刺了，你最想看到？', options:[
+    {text:'误会澄清！两人冰释前嫌，感情更胜从前',score:1},
+    {text:'主角黑化，把背刺的人踩进泥里永不回头',score:-1},
+    {text:'放下执念，不原谅也不报复，走自己的路',score:0}
+  ]},
+  {dim:3, text:{
+    bg:'追了半年的言情完结了，结局是开放式——',
+    bl:'追了半年的耽美完结了，结局是开放式——',
+    gl:'追了半年的百合完结了，结局是开放式——'
+  }, options:[
+    {text:'崩溃！我需要看到TA们在一起！求番外！',score:1},
+    {text:'挺好，留白比强行HE高级，过程精彩就够了',score:-1},
+    {text:'去评论区和大家一起脑补HE安慰自己',score:0}
+  ]},
+  {dim:3, text:'以下哪个设定最让你血脉偾张？', options:[
+    {text:'历经万难终成眷属，从此岁月静好',score:1},
+    {text:'重生回来不是为了爱情，是为了踩着所有人上位',score:-1},
+    {text:'重生回到过去，既要改命也要挽回所爱',score:0}
+  ]}
+];
+
+const dimLabels = [
+  {left:'G · 言情BG',right:'B · 纯爱耽百'},
+  {left:'P · 纯甜',right:'D · 刀子'},
+  {left:'M · 强强',right:'S · 反差'},
+  {left:'O · 死忠HE',right:'N · 清醒革新'}
+];
+
+const types = {
+GPMO:{name:'高岭之花守护者',tagline:'「最好的爱情，是两个成年人的双向奔赴。」',tags:['正统言情','双向奔赴','势均力敌','禁欲系','成年人恋爱','军婚','星际言情','1v1'],desc:'你是言情界的正道之光，只吃顶级糖，偏爱成熟、内敛、双商在线的成年人恋爱。禁欲系教授、投行大佬、不苟言笑的高岭之花——这些人设精准命中你的审美。你拒绝狗血误会，信奉势均力敌的双向奔赴才是爱情的终极形态。不管是都市CBD的精英对决，还是星际战场上的并肩作战，只要两人棋逢对手、互相尊重，你就嗑得嘎嘎响。别人沉迷修罗场的时候，你只想看两个大人认认真真谈一场势均力敌的恋爱。',fav:'禁欲系教授 · 投行大佬 · 星际将军 · 高冷军官 · 温柔但有底线的守护者',recs:['双向奔赴','势均力敌甜恋','禁欲系','高岭之花融化','军婚','星际言情','成年人恋爱'],best:'BPMO',rival:'BDSN'},
+GPMN:{name:'沙雕文学继承人',tagline:'「谈恋爱不如讲段子，笑死在评论区才是正经事。」',tags:['沙雕','吐槽','欢喜冤家','梗王','脑回路清奇','种田沙雕','穿书','系统'],desc:'谈恋爱不如讲段子！你喜欢的主角必须是梗王，在最严肃的场合蹦出最离谱的金句。沙雕甜文是你的快乐源泉，笑着笑着突然被塞一嘴糖才是你最爱的节奏。种田文里搞发明把全村人看傻、穿书后疯狂吐槽原著剧情线、拿到系统后把系统气到自闭宕机——这类离谱操作看一次笑一次。末世背景也好星际背景也罢，只要画风够沙雕你就追。你的安利语录永远是「这本笑死我了你快看！」',fav:'咸鱼翻身炮灰 · 行走的段子手 · 把系统气到宕机的宿主 · 穿书吐槽狂魔 · 种田发明家',recs:['沙雕甜文','欢喜冤家','穿书吐槽','搞笑种田','系统抽风','画风清奇','末世沙雕日常'],best:'BPMN',rival:'BDSO'},
+GPSO:{name:'赛博种田养老派',tagline:'「没有争斗，只有发家致富和一日三餐。」',tags:['种田文','萌宠','满级大佬','日常甜','慢生活','经营','末世种田','星际基建','美食'],desc:'你追求极致的舒适感。没有争斗、没有阴谋，只有发家致富和温馨日常。种田、经营、带崽、养萌宠——你的理想小说就是一部田园牧歌。满级大佬隐退新手村一边种地一边惊艳全场是你的快乐老家。末世废土上开垦农场搞基建、星际荒星上种出满级灵植——别人在拯救世界，你的主角在研究今晚吃什么。只要有种田情节，古代现代末世星际你全都吃。',fav:'满级神医隐居 · 末世种田基建大佬 · 星际荒星开荒者 · 美食博主穿越 · 带崽养萌宠的退休强者',recs:['种田经营','满级回归','萌宠日常','美食文','末世种田','星际基建','穿越发家致富'],best:'BPSO',rival:'BDMO'},
+GPSN:{name:'支配外挂构建师',tagline:'「传统套路看腻了？让TA来掌控一切。」',tags:['女强','GB','女A男O','大女主','反套路','四爱','ABO','星际女将军','御姐'],desc:'你对传统叙事感到厌倦，偏爱打破性别权力格局的反套路故事。女强GB、女A男O、四爱NP——弱气美人和清冷娇花才是你的取向狙击。ABO世界观里霸气侧漏的女Alpha、星际背景下征服星海的女将军、末世中一手建立势力的大女主——这些设定让你血脉偾张。你要的不是被保护，是自己掌控全场。甜可以，但必须是反套路框架里的甜。传统霸总文？不好意思，霸总得是她。',fav:'腹黑御姐 · 女A男O霸道Alpha · 星际女将军 · 末世女王 · 身娇体弱心机美人',recs:['女强GB','女A男O','大女主甜宠','反套路恋爱','四爱NP','ABO女强','星际女将军'],best:'BPSN',rival:'GDSO'},
+GDMO:{name:'修罗场赛博庄家',tagline:'「三个人的电影太拥挤？不，十个人刚好。」',tags:['万人迷','修罗场','全员单箭头','钓系美人','NP','ABO万人迷','末世团宠','美人无自觉'],desc:'你喜欢看所有人为主角发疯。三个人的电影太拥挤？不，你觉得十个人刚好。万人迷体质、修罗场、全员单箭头——这些设定是你的精神鸦片。ABO世界里让全员为信息素失控、末世中被各路大佬争着抢着拉入队伍、星际帝国里各派势力的政治联姻对象——不管什么世界观你都能嗑出一整个修罗场。不管最后主角选谁，你都觉得落选的也很香。你就是修罗场的最大赢家，坐在赛博VIP席位看他们互撕。',fav:'钓系美人 · 无自觉海王 · ABO万人迷Omega · 末世团宠 · 星际政治联姻对象 · 全员为TA发疯',recs:['万人迷','修罗场','全员暗恋','钓系美人','NP/多线','ABO万人迷','末世团宠'],best:'BDMO',rival:'GPSO'},
+GDMN:{name:'快穿位面狩猎者',tagline:'「每个位面三分钟虐渣，剩下时间用来打脸。」',tags:['快穿','系统','打脸爽文','虐渣','满级归来','星际位面','末世位面','横扫千军'],desc:'你没有耐心磨叽，只想看主角在不同世界横扫千军、疯狂打脸。虐渣要快准狠，满级大佬重回新手村碾压全场。ABO位面里扮弱Omega实则碾压全场Alpha、星际位面里废物皇子一夜逆袭、末世位面里一人灭一城——每个位面都是一次酣畅淋漓的复仇爽剧。快穿系统文是你永远的电子精神食粮，一口气刷到凌晨四点不带犹豫。你的快乐很简单：看大佬装弱鸡然后秒杀全场。',fav:'满级任务者 · 冷酷系统 · 位面碾压型主角 · ABO扮猪吃老虎 · 各世界花式虐渣的大佬',recs:['快穿打脸','系统文','满级虐渣','位面穿越','星际快穿','末世逆袭','爽文天花板'],best:'BDMN',rival:'BPSO'},
+GDSO:{name:'火葬场首席质检员',tagline:'「你曾对我不屑一顾，如今我让你高攀不起。」',tags:['追妻火葬场','破镜重圆','强制爱','偏执','虐恋情深','ABO标记','深情渣改','跪族'],desc:'你信奉「不虐不爱」，最爱看不可一世的渣人为了挽回尊严尽失，在雨中跪三天三夜。追妻火葬场的每一把火，都有你在旁边严格质检——跪得不够惨？重来！ABO文里强制标记后悔到发疯想解除标记、偏执总裁把人弄丢才知道心有多痛、星际将军抛弃发小后被发小成为帝国元帅打脸——这种「你曾经高攀不起如今你不配」的戏码让你欲罢不能。你的精神状态：渣得越狠，跪得越值。',fav:'疯批霸总 · 偏执追妻狂魔 · ABO强制标记后悔Alpha · 深情渣改 · 在雨中跪出包浆的前任',recs:['追妻火葬场','破镜重圆','强制爱','偏执追妻','ABO虐恋','深情虐恋','先虐后甜'],best:'BDSO',rival:'GPSN'},
+GDSN:{name:'凤凰涅槃设计师',tagline:'「最好的复仇不是原谅，是碾压。」',tags:['大女主逆袭','重生复仇','虐渣','黑化归来','打脸','涅槃','末世重生','星际复仇'],desc:'你最爱看被踩到泥里的主角重生归来，一路开挂碾压所有曾经伤害过TA的人。末世重生回到爆发前疯狂囤物资抢据点、星际被流放后建立新帝国、宅斗被害后重活一世步步为营、ABO觉醒后从被欺负的Omega变成最强者——不管什么背景，逆袭的快感你永远吃不腻。你不执着于恋爱线，更关注复仇的艺术和碾压的爽感。你相信最好的复仇不是原谅，是让所有人跪着叫爸爸。',fav:'重生女帝 · 黑化归来复仇者 · 末世重生囤货大佬 · 星际流放逆袭者 · ABO觉醒碾压者',recs:['重生逆袭','大女主/大男主复仇','虐渣打脸','黑化归来','末世重生','星际逆袭','涅槃爽文'],best:'BDSN',rival:'GPMO'},
+BPMO:{name:'百合花海园丁',tagline:'「细腻、敏感、充满力量——这才是最美的连接。」',tags:['姬圈天菜','双御姐','互攻','纯爱','强强联手','ABO双A','哨兵向导','细腻'],desc:'你追求同性之间细腻、敏感又充满力量的连接。可以是清纯校园的暗恋，更爱成熟社会中势均力敌的灵魂碰撞。两个同样优秀的人互相吸引、互相成就，是你心中最美的爱情模样。ABO设定下双Alpha的火花四溅、哨兵向导的灵魂共鸣、双御互攻的极致拉扯——强强联手是你永远的白月光。星际军人之间的并肩作战、末世废土上两个势力领袖的惺惺相惜，你信奉最美的爱情不分性别，只看灵魂是否旗鼓相当。',fav:'冷艳女明星×金牌经纪人 · ABO双A大佬 · 哨兵×向导灵魂伴侣 · 星际军官CP · 势均力敌双强',recs:['百合互攻','双强纯爱','强强联手BL','ABO双A','哨兵向导','御姐恋','星际纯爱'],best:'GPMO',rival:'BDSN'},
+BPMN:{name:'赛博嗑糖永动机',tagline:'「这本太甜了姐妹们快冲！不甜你来找我！」',tags:['CP大法好','甜到齁','安利狂魔','双向奔赴','反套路甜','虫族甜宠','ABO甜饼','磕到昏厥'],desc:'你是纯爱圈的糖分供应商，只嗑甜只安利。你的书单没有一本虐文，口头禅是「这本太甜了快冲」。ABO世界里Alpha把Omega宠上天、虫族设定里虫族把伴侣捧在掌心含在嘴里、星际军婚甜到齁——什么小众设定到了你嘴里都能变成糖。比起传统套路你更爱新鲜有趣的甜法，别人没想到的糖你都能嗑出花来。你的存在就是一台永不停歇的安利机器，每天都在刷新「今日最甜」记录。',fav:'沙雕甜蜜CP · ABO甜系Alpha · 虫族宠妻狂魔 · 双向暗恋笨蛋情侣 · 星际军婚甜饼',recs:['纯甜BL/GL','双向奔赴','互宠日常','ABO甜饼','虫族甜宠','甜饼合集','反套路甜'],best:'GPMN',rival:'BDSO'},
+BPSO:{name:'治愈系修猫繁育员',tagline:'「现实太苦，只想在小说里养一只修狗/修猫贴贴。」',tags:['年下狼狗','忠犬养成','小甜饼','反差萌','奶狗','粘人精','虫族','ABO','种田纯爱'],desc:'现实太苦，你只想在小说里养一只全心全意的修狗/修猫。拒绝任何误会情节，只要贴贴和撒娇。年下狼狗、忠犬攻、粘人精——你的取向清晰如水。ABO设定里被Alpha整天贴贴蹭蹭散发信息素、虫族文里虫族把你当全宇宙最珍贵的宝贝宠着护着、种田文里一边种地一边腻歪——你追文的最高评价就是「好乖好可爱我死了」。末世也好星际也罢，只要有人宠有人撒娇你就满足了。',fav:'粘人精年下 · 温柔忠犬攻 · ABO深情Alpha · 虫族忠犬 · 种田甜系伴侣 · 全心全意的小太阳',recs:['年下攻','忠犬养成','ABO甜宠','虫族宠文','种田纯爱','奶狗日常','反差萌甜宠'],best:'GPSO',rival:'GDMN'},
+BPSN:{name:'人间清醒换攻狂',tagline:'「你不珍惜我？没关系，有的是人排队。」',tags:['换攻文学','反火葬场','虐渣','清醒受','洒脱','新欢胜旧爱','ABO换Alpha','人间清醒'],desc:'破镜重圆？在你这门都没有。你最爱看认清渣前任后，潇洒转身牵手更好的人。ABO世界里Omega解除标记去找更好的Alpha、星际被退婚后转头嫁给帝国元帅让前任肠子悔青、虫族文里被抛弃的雌虫遇到更强更帅的雄虫——「你不珍惜我？没关系，有的是人排队。」换攻文学和反火葬场是你的情绪解药。你是清醒本醒，看别人还在那舔狗，恨不得冲进屏幕摇醒TA：别回头了，前面的更好！',fav:'黑化受/攻 · ABO解除标记的飒爽Omega · 清醒独立的前白月光 · 踹掉渣前任的爽文主角 · 虫族换雄',recs:['换攻文学','反火葬场','前任后悔莫及','ABO换A','虫族换雄','虐渣','新欢胜旧爱'],best:'GPSN',rival:'GDSO'},
+BDMO:{name:'极限拉扯野心家',tagline:'「高手过招的性张力，才是最高级的浪漫。」',tags:['强强博弈','宿命感','势均力敌','虐恋情深','双大佬','死对头变情人','星际权谋','ABO双A'],desc:'两个大佬的灵魂碰撞，互相算计又互相沉沦。你爱的不是恋爱，是高手过招的极致张力。死对头变情人、双间谍互撕、权力巅峰的致命吸引——这种宿命感让你欲罢不能。ABO世界里两个Alpha的禁忌博弈、星际帝国敌对阵营将领的暗恋、末世废土上两个势力头目的极限拉扯——势均力敌的虐恋才是最高级的浪漫。你追文从不嗑糖，嗑的是那股子谁也不肯先低头的窒息张力。',fav:'双特工 · 死对头变情人 · ABO双A禁忌恋 · 星际敌对阵营将领 · 末世双势力头目 · 宿命纠缠者',recs:['强强博弈','死对头变情人','ABO双A','星际权谋','双特工','宿命虐恋','末世强强'],best:'GDMO',rival:'GPSO'},
+BDMN:{name:'白月光反杀专家',tagline:'「你以为我还是从前那个我？做梦。」',tags:['白月光','黑化归来','替身反杀','重生','复仇者','全员后悔','星际逆袭','末世重生'],desc:'当替身？不可能的。你最爱看白月光/替身归来后，不是为了重修旧好，而是为了把所有人踩在脚下。ABO世界里被抛弃的Omega觉醒成最强Alpha碾压前任、星际帝国的弃子回归碾压皇位继承人、末世重生后一个个清算前世仇人、虫族文里被驱逐的雌虫带着满级异能归来——「你以为我还是从前那个我？做梦。」每一次反杀都让你血脉偾张。重生复仇、替身逆袭是你的永恒信仰，看一本爽一本。',fav:'重生归来的复仇者 · 反杀白月光 · ABO觉醒型Omega · 星际弃子归来 · 虫族满级归来 · 碾压全员的黑化大佬',recs:['替身反杀','白月光归来','重生复仇','ABO逆袭','星际逆袭','末世重生','黑化逆袭'],best:'GDMN',rival:'BPSO'},
+BDSO:{name:'美强惨骨灰级藏家',tagline:'「越是被摧毁又重建的角色，越让我疯狂。」',tags:['弱攻强受','美强惨','病娇','战损美人','禁忌','破碎感','ABO','虫族','偏执'],desc:'你对「破碎感」有着极致的迷恋。美强惨、战损美人、弱攻强受——越是强大的角色被命运摧毁又重建，你越是疯狂。ABO世界里最强Alpha被迫臣服标记、虫族设定里被偏执雄虫死死困住的雌虫、禁忌师徒虐恋中的战损美人——病娇、偏执、弱攻强受、强制爱都在你的守备范围。末世背景里为了保护爱人不断受伤的战损美人更是精准踩中你的心巴。你爱的不是痛苦本身，是那种极致的破碎美感。每个看过你书单的人都会问：你还好吗？',fav:'战损美人 · 弱攻强受隐忍主角 · ABO被强制标记的美人 · 虫族偏执雄虫 · 病娇深情疯批 · 末世战损守护者',recs:['美强惨','弱攻强受','病娇文学','战损美人','ABO虐文','虫族','禁忌师徒恋','偏执暗恋'],best:'GDSO',rival:'GPMN'},
+BDSN:{name:'小黑屋文学资深房东',tagline:'「爱就是锁链，是无处可逃。」',tags:['占有欲','囚禁','黑化病娇','偏执','暗黑','强制爱','ABO强制标记','虫族囚禁','末世占有'],desc:'你的口味偏重，最爱看「得不到就毁掉」的极端偏执。爱就是锁链，是无处可逃。黑化病娇、占有欲爆棚、囚禁系——你对暗黑文学有着超乎常人的热忱。ABO世界里的强制标记和信息素压制、虫族设定里雄虫把雌虫关在巢穴寸步不离、末世废土中为了「保护」而囚禁、星际帝国里偏执皇帝的金丝雀——别人觉得离谱的设定，你觉得刚刚好。偏执到极致就是浪漫，比起大团圆你更想看极端到底的占有。你的阅读口味比你本人危险得多。',fav:'深情偏执狂 · ABO强制标记疯批Alpha · 虫族占有欲爆棚雄虫 · 末世囚禁系守护者 · 龙族/魔尊占有狂 · 黑化到底的病娇',recs:['占有欲文学','囚禁play','黑化病娇','ABO强制标记','虫族占有','偏执暗恋','末世占有','极端占有'],best:'GDSN',rival:'GPMO'}
+};
+
+let currentQ = 0;
+let scores = [0,0,0,0];
+const app = document.getElementById('app');
+
+function initParticles(){
+  const c = document.getElementById('particles');
+  for(let i=0;i<15;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random()*4+2;
+    const g = Math.floor(Math.random()*80+180);
+    p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;background:rgb(${g},${g},${g});animation-duration:${Math.random()*10+8}s;animation-delay:${Math.random()*12}s`;
+    c.appendChild(p);
+  }
+}
+
+function renderLanding(){
+  app.innerHTML = `
+    <div class="landing">
+      <div class="landing-icon">///</div>
+      <h1>你是哪种type的书虫？</h1>
+      <p class="subtitle">4 维度 · 14 题 · 16 型人格</p>
+      <p class="desc">性向 × 浓度 × 动力 × 结局<br>从追妻火葬场到无虐纯甜，从美强惨到沙雕文学<br>找到属于你的书虫DNA</p>
+      <div class="tag-cloud">
+        <span>追妻火葬场</span><span>破镜重圆</span><span>强强博弈</span>
+        <span>弱攻强受</span><span>美强惨</span><span>偏执病娇</span>
+        <span>ABO</span><span>虫族</span><span>星际</span><span>末世</span>
+        <span>种田</span><span>万人迷</span><span>快穿打脸</span>
+      </div>
+      <button class="start-btn" onclick="startQuiz()">开 始 测 试</button>
+    </div>`;
+}
+
+function renderQuestion(){
+  const q = questions[currentQ];
+  const pct = ((currentQ)/questions.length*100).toFixed(0);
+  const qText = tx(q.text);
+
+  let bodyHTML = '';
+  if(q.multi){
+    const pills = q.options.map((o,i)=>
+      `<button class="tag-option" data-idx="${i}" data-score="${o.score}" onclick="toggleTag(this)">${tx(o.text)}</button>`
+    ).join('');
+    bodyHTML = `
+      <div class="question-hint">可多选，至少选一个</div>
+      <div class="multi-options">${pills}</div>
+      <button class="next-btn" disabled onclick="confirmMulti()">下一题</button>`;
+  } else {
+    const labels = ['A','B','C'];
+    bodyHTML = q.options.map((o,i)=>
+      `<button class="option-btn" onclick="answer(${o.score})">
+        <span class="option-label"><span class="option-icon">${labels[i]}.</span>${tx(o.text)}</span>
+      </button>`
+    ).join('');
+    bodyHTML = `<div class="options">${bodyHTML}</div>`;
+  }
+
+  app.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-text">${currentQ+1} / ${questions.length}</div>
+    </div>
+    <div class="question-page" id="qpage">
+      <div class="question-num">Q${currentQ+1}</div>
+      <div class="question-text">${qText}</div>
+      ${bodyHTML}
+    </div>`;
+}
+
+function toggleTag(el){
+  el.classList.toggle('selected');
+  const any = document.querySelectorAll('.tag-option.selected').length > 0;
+  document.querySelector('.next-btn').disabled = !any;
+}
+
+function confirmMulti(){
+  const selected = document.querySelectorAll('.tag-option.selected');
+  if(!selected.length) return;
+  // After Q1: set orientation for all subsequent questions
+  if(currentQ === 0){
+    const sel = new Set();
+    selected.forEach(el => sel.add(el.textContent.trim()));
+    if(sel.has('耽美BL')) orient = 'bl';
+    else if(sel.has('百合GL')) orient = 'gl';
+    else orient = 'bg';
+  }
+  let sum = 0;
+  selected.forEach(el => sum += parseInt(el.dataset.score));
+  const val = sum > 0 ? 1 : (sum < 0 ? -1 : 0);
+  scores[questions[currentQ].dim] += val;
+  currentQ++;
+  advance();
+}
+
+function answer(val){
+  scores[questions[currentQ].dim] += val;
+  currentQ++;
+  advance();
+}
+
+function advance(){
+  if(currentQ >= questions.length){
+    renderLoading();
+    setTimeout(()=>renderResult(getTypeCode()),2000);
+  } else {
+    const page = document.getElementById('qpage');
+    page.style.animation = 'fadeOut .25s ease forwards';
+    setTimeout(renderQuestion, 250);
+  }
+}
+
+function renderLoading(){
+  const tips = ['正在扫描你的书架DNA...','正在鉴定你的嗑文浓度...','正在生成你的书虫人格档案...','正在召唤你的本命赛道...','正在匹配你的灵魂CP类型...'];
+  app.innerHTML = `
+    <div class="loading-page">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">人格档案生成中</div>
+      <div class="loading-tips">${tips[Math.floor(Math.random()*tips.length)]}</div>
+    </div>`;
+}
+
+function getTypeCode(){
+  return (scores[0]>0?'G':'B')+(scores[1]>0?'P':'D')+(scores[2]>0?'M':'S')+(scores[3]>0?'O':'N');
+}
+
+function renderResult(code){
+  const t = types[code];
+  const best = types[t.best];
+  const rival = types[t.rival];
+  const dimMax = [0,0,0,0];
+  questions.forEach(q => dimMax[q.dim]++);
+  const dimBarsHTML = dimLabels.map((d,i)=>{
+    const pct = Math.max(0,Math.min(100,((scores[i]+dimMax[i])/(2*dimMax[i])*100))).toFixed(0);
+    return `<div class="dim-item">
+      <div class="dim-labels"><span class="dim-left">${d.left}</span><span class="dim-right">${d.right}</span></div>
+      <div class="dim-bar"><div class="dim-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="result-page">
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-code">${code}</div>
+          <div class="result-name">${t.name}</div>
+          <div class="result-tagline">${t.tagline}</div>
+        </div>
+        <div class="result-body">
+          <div class="result-tags">${t.tags.map(tag=>`<span class="result-tag">#${tag}</span>`).join('')}</div>
+          <div class="result-desc">${t.desc}</div>
+          <div class="result-fav"><strong>本命人设：</strong>${t.fav}</div>
+          <div class="dimension-bars">${dimBarsHTML}</div>
+          <div class="result-section">
+            <h3>推荐赛道</h3>
+            <div class="rec-tags">${t.recs.map(r=>`<span class="rec-tag">${r}</span>`).join('')}</div>
+          </div>
+          <div class="result-section">
+            <h3>灵魂匹配</h3>
+            <div class="match-row">
+              <div class="match-card best">
+                <div class="label">最佳书搭子</div>
+                <div class="name">${best.name}</div>
+                <div style="font-size:11px;color:#bbb;margin-top:2px">${t.best}</div>
+              </div>
+              <div class="match-card rival">
+                <div class="label">审美死对头</div>
+                <div class="name">${rival.name}</div>
+                <div style="font-size:11px;color:#bbb;margin-top:2px">${t.rival}</div>
+              </div>
+            </div>
+          </div>
+          <div class="watermark">16型书虫人格测试 NOVEL PERSONALITY TEST</div>
+        </div>
+      </div>
+      <div class="action-btns">
+        <button class="action-btn btn-primary" onclick="copyResult('${code}')">复制结果</button>
+        <button class="action-btn btn-secondary" onclick="restart()">重新测试</button>
+      </div>
+    </div>`;
+  setTimeout(()=>{
+    document.querySelectorAll('.dim-fill').forEach(el=>{
+      const w = el.style.width; el.style.width = '0%';
+      requestAnimationFrame(()=>{el.style.width = w});
+    });
+  },100);
+}
+
+function startQuiz(){ currentQ=0; scores=[0,0,0,0]; orient='bg'; renderQuestion(); }
+function restart(){ currentQ=0; scores=[0,0,0,0]; orient='bg'; renderLanding(); }
+
+function copyResult(code){
+  const t = types[code];
+  const text = `【我的书虫人格测试结果】\n\n${code} — ${t.name}\n${t.tagline}\n\n${t.tags.map(x=>'#'+x).join(' ')}\n\n${t.desc}\n\n本命人设：${t.fav}\n推荐赛道：${t.recs.join('、')}\n最佳书搭子：${types[t.best].name}\n审美死对头：${types[t.rival].name}\n\n你是哪种type的书虫？快来测测吧！`;
+  navigator.clipboard.writeText(text).then(()=>showToast('已复制到剪贴板')).catch(()=>showToast('复制失败，请长按手动复制'));
+}
+
+function showToast(msg){
+  const old = document.querySelector('.toast');
+  if(old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+
+function checkUrlResult(){
+  const hash = location.hash.slice(1);
+  if(hash && types[hash]){
+    const dimMax = [0,0,0,0];
+    questions.forEach(q => dimMax[q.dim]++);
+    scores = [
+      'GB'.indexOf(hash[0])===0 ? dimMax[0] : -dimMax[0],
+      'PD'.indexOf(hash[1])===0 ? dimMax[1] : -dimMax[1],
+      'MS'.indexOf(hash[2])===0 ? dimMax[2] : -dimMax[2],
+      'ON'.indexOf(hash[3])===0 ? dimMax[3] : -dimMax[3]
+    ];
+    renderResult(hash); return true;
+  }
+  return false;
+}
+
+initParticles();
+if(!checkUrlResult()) renderLanding();
+</script>
+</body>
+</html>
