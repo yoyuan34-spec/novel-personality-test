@@ -115,6 +115,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 /* ── orientation context system ── */
 let orient = 'bg';
 function tx(v){ return typeof v==='string' ? v : (v[orient]||v.bg); }
+function adaptResult(text){
+  if(orient!=='gl') return text;
+  return text
+    .replace(/换攻文学/g,'换CP文学').replace(/换攻狂/g,'换CP达人').replace(/换攻/g,'换CP')
+    .replace(/弱攻强受/g,'反差CP').replace(/互攻/g,'互相拉扯')
+    .replace(/让渣攻独自后悔/g,'让前任独自后悔').replace(/踹掉渣攻的潇洒受/g,'踹掉前任的潇洒主角').replace(/渣攻/g,'前任')
+    .replace(/忠犬攻/g,'忠犬').replace(/年下攻/g,'年下').replace(/清醒受/g,'清醒主角')
+    .replace(/纯甜BL\/GL/g,'纯甜GL/BL').replace(/纯爱圈/g,'百合圈')
+    .replace(/大师兄/g,'大师姐').replace(/师兄弟/g,'师姐妹')
+    .replace(/学弟暗恋学长/g,'学妹暗恋学姐').replace(/校园纯爱少年/g,'校园纯爱少女')
+    .replace(/爱的是他可惜/g,'爱的是她可惜').replace(/亏欠他的人/g,'亏欠她的人')
+    .replace(/看他站在/g,'看她站在').replace(/他笑着说/g,'她笑着说').replace(/就他们不知道/g,'就她们不知道');
+}
 
 const questions = [
   // ═══ dim0: G vs B (仅此1题，直接定性向) ═══
@@ -189,9 +202,9 @@ const questions = [
   {dim:2, multi:true, text:'哪些人设让你直接上头？', options:[
     {text:'强强联手',score:1},
     {text:'双大佬',score:1},
-    {text:{bg:'势均力敌',bl:'互攻',gl:'互攻'},score:1},
+    {text:{bg:'势均力敌',bl:'互攻',gl:'互相拉扯'},score:1},
     {text:'禁欲系',score:1},
-    {text:{bg:'弱男强女',bl:'弱攻强受',gl:'弱攻强受'},score:-1},
+    {text:{bg:'弱男强女',bl:'弱攻强受',gl:'反差CP'},score:-1},
     {text:'美强惨',score:-1},
     {text:'偏执疯批',score:-1},
     {text:'病娇',score:-1},
@@ -472,17 +485,17 @@ function renderResult(code){
       <div class="result-card">
         <div class="result-header">
           <div class="result-code">${code}</div>
-          <div class="result-name">${t.name}</div>
-          <div class="result-tagline">${t.tagline}</div>
+          <div class="result-name">${adaptResult(t.name)}</div>
+          <div class="result-tagline">${adaptResult(t.tagline)}</div>
         </div>
         <div class="result-body">
-          <div class="result-tags">${t.tags.map(tag=>`<span class="result-tag">#${tag}</span>`).join('')}</div>
-          <div class="result-desc">${t.desc}</div>
-          <div class="result-fav"><strong>本命人设：</strong>${t.fav}</div>
+          <div class="result-tags">${t.tags.map(tag=>`<span class="result-tag">#${adaptResult(tag)}</span>`).join('')}</div>
+          <div class="result-desc">${adaptResult(t.desc)}</div>
+          <div class="result-fav"><strong>本命人设：</strong>${adaptResult(t.fav)}</div>
           <div class="dimension-bars">${dimBarsHTML}</div>
           <div class="result-section">
             <h3>推荐赛道</h3>
-            <div class="rec-tags">${t.recs.map(r=>`<span class="rec-tag">${r}</span>`).join('')}</div>
+            <div class="rec-tags">${t.recs.map(r=>`<span class="rec-tag">${adaptResult(r)}</span>`).join('')}</div>
           </div>
           <div class="result-section">
             <h3>灵魂匹配</h3>
@@ -520,7 +533,7 @@ function restart(){ currentQ=0; scores=[0,0,0,0]; orient='bg'; renderLanding(); 
 
 function copyResult(code){
   const t = types[code];
-  const text = `【我的书虫人格测试结果】\n\n${code} — ${t.name}\n${t.tagline}\n\n${t.tags.map(x=>'#'+x).join(' ')}\n\n${t.desc}\n\n本命人设：${t.fav}\n推荐赛道：${t.recs.join('、')}\n最佳书搭子：${types[t.best].name}\n审美死对头：${types[t.rival].name}\n\n你是哪种type的书虫？快来测测吧！`;
+  const text = `【我的书虫人格测试结果】\n\n${code} — ${adaptResult(t.name)}\n${adaptResult(t.tagline)}\n\n${t.tags.map(x=>'#'+adaptResult(x)).join(' ')}\n\n${adaptResult(t.desc)}\n\n本命人设：${adaptResult(t.fav)}\n推荐赛道：${t.recs.map(r=>adaptResult(r)).join('、')}\n最佳书搭子：${adaptResult(types[t.best].name)}\n审美死对头：${adaptResult(types[t.rival].name)}\n\n你是哪种type的书虫？快来测测吧！`;
   navigator.clipboard.writeText(text).then(()=>showToast('已复制到剪贴板')).catch(()=>showToast('复制失败，请长按手动复制'));
 }
 
