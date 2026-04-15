@@ -40,20 +40,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 
 /* Single-select */
 .options{display:flex;flex-direction:column;gap:12px}
-.option-btn{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;font-size:14px;color:var(--black);text-align:left;cursor:pointer;transition:all .25s;line-height:1.6}
+.option-btn{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;font-size:14px;font-weight:400;color:var(--black);text-align:left;cursor:pointer;transition:all .25s;line-height:1.6}
 .option-btn:hover{border-color:#999;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.06)}
 .option-btn:active{transform:scale(0.98);background:var(--tag-bg)}
 .option-label{position:relative;z-index:1}
-.option-icon{margin-right:8px;font-weight:800;color:#bbb}
+.option-icon{margin-right:8px;font-weight:400;color:#bbb}
 
 /* Multi-select pills */
 .multi-options{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}
-.tag-option{padding:10px 20px;border:1.5px solid var(--border);border-radius:28px;background:var(--card);color:var(--black);font-size:14px;cursor:pointer;transition:all .2s;user-select:none;font-weight:500}
+.tag-option{padding:10px 20px;border:1.5px solid var(--border);border-radius:28px;background:var(--card);color:var(--black);font-size:14px;cursor:pointer;transition:all .2s;user-select:none;font-weight:400}
 .tag-option:hover{border-color:#999}
 .tag-option.selected{background:var(--black);color:#fff;border-color:var(--black)}
 .next-btn{width:100%;padding:15px;border-radius:14px;border:none;background:var(--black);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:1px}
 .next-btn:disabled{background:#ddd;color:#aaa;cursor:not-allowed}
 .next-btn:not(:disabled):hover{background:#333;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+.back-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;color:#bbb;font-size:13px;cursor:pointer;padding:10px 0;margin-top:12px;transition:color .2s}
+.back-btn:hover{color:var(--black)}
 
 .loading-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;animation:fadeIn .5s ease}
 .loading-spinner{width:48px;height:48px;border:2px solid #eee;border-top-color:var(--black);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px}
@@ -342,6 +344,7 @@ BDSN:{name:'小黑屋文学资深房东',tagline:'「爱就是锁链，是无处
 
 let currentQ = 0;
 let scores = [0,0,0,0];
+let answers = [];
 const app = document.getElementById('app');
 
 function initParticles(){
@@ -398,6 +401,8 @@ function renderQuestion(){
     bodyHTML = `<div class="options">${bodyHTML}</div>`;
   }
 
+  const backBtn = currentQ > 0 ? `<button class="back-btn" onclick="goBack()">← 上一题</button>` : '';
+
   app.innerHTML = `
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
@@ -407,6 +412,7 @@ function renderQuestion(){
       <div class="question-num">Q${currentQ+1}</div>
       <div class="question-text">${qText}</div>
       ${bodyHTML}
+      ${backBtn}
     </div>`;
 }
 
@@ -430,12 +436,14 @@ function confirmMulti(){
   let sum = 0;
   selected.forEach(el => sum += parseInt(el.dataset.score));
   const val = sum > 0 ? 1 : (sum < 0 ? -1 : 0);
+  answers.push({dim:questions[currentQ].dim, val:val, orient:orient});
   scores[questions[currentQ].dim] += val;
   currentQ++;
   advance();
 }
 
 function answer(val){
+  answers.push({dim:questions[currentQ].dim, val:val, orient:orient});
   scores[questions[currentQ].dim] += val;
   currentQ++;
   advance();
@@ -450,6 +458,15 @@ function advance(){
     page.style.animation = 'fadeOut .25s ease forwards';
     setTimeout(renderQuestion, 250);
   }
+}
+
+function goBack(){
+  if(currentQ <= 0 || !answers.length) return;
+  const prev = answers.pop();
+  scores[prev.dim] -= prev.val;
+  orient = prev.orient;
+  currentQ--;
+  renderQuestion();
 }
 
 function renderLoading(){
@@ -528,8 +545,8 @@ function renderResult(code){
   },100);
 }
 
-function startQuiz(){ currentQ=0; scores=[0,0,0,0]; orient='bg'; renderQuestion(); }
-function restart(){ currentQ=0; scores=[0,0,0,0]; orient='bg'; renderLanding(); }
+function startQuiz(){ currentQ=0; scores=[0,0,0,0]; answers=[]; orient='bg'; renderQuestion(); }
+function restart(){ currentQ=0; scores=[0,0,0,0]; answers=[]; orient='bg'; renderLanding(); }
 
 function copyResult(code){
   const t = types[code];
